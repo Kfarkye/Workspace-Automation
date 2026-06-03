@@ -1,0 +1,6 @@
+{
+  "name": "Gemini Workspace Automator",
+  "description": "Agentic AI for autonomous Google Workspace workflows, summarizing emails, extracting structured data, and generating reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

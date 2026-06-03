@@ -1,0 +1,121 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@theme {
+    --color-aura-bg: #000000;
+    --color-aura-card: #0A0A0A;
+    --color-aura-muted: #111111;
+    --color-aura-border: #222222;
+    --color-aura-text: #F5F5F7;
+    --color-aura-text-muted: #86868B;
+    --color-aura-accent: #FFFFFF;
+    --color-aura-accent-hover: #E5E5EA;
+    --color-aura-red: #FF3B30;
+    
+    --background: #000000;
+    --foreground: #F5F5F7;
+    --card: #0A0A0A;
+    --card-foreground: #F5F5F7;
+    --popover: #0A0A0A;
+    --popover-foreground: #F5F5F7;
+    --primary: #FFFFFF;
+    --primary-foreground: #000000;
+    --secondary: #111111;
+    --secondary-foreground: #F5F5F7;
+    --muted: #111111;
+    --muted-foreground: #86868B;
+    --accent: #111111;
+    --accent-foreground: #FFFFFF;
+    --destructive: #FF3B30;
+    --border: #222222;
+    --input: #222222;
+    --ring: #FFFFFF;
+}
+
+body {
+    background-color: var(--color-aura-bg);
+    color: var(--color-aura-text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-weight: 300;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; 
+    overscroll-behavior-y: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+}
+
+::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* IBM Plex Mono Simulation for tabular data */
+.font-mono-data {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.solid-panel {
+    background-color: var(--color-aura-bg);
+}
+
+/* Hardware-accelerated UI Animations */
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+    animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+.animate-fade-in {
+    animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes pulseSoft {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+.animate-pulse-soft {
+    animation: pulseSoft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.aura-btn {
+    background-color: var(--color-aura-accent);
+    color: #000000;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+.aura-btn:active {
+    transform: scale(0.96);
+    background-color: var(--color-aura-accent-hover);
+}
+.aura-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.aura-btn-secondary {
+    background-color: var(--color-aura-card);
+    color: var(--color-aura-text);
+    border: 1px solid var(--color-aura-border);
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+.aura-btn-secondary:active {
+    background-color: var(--color-aura-muted);
+    transform: scale(0.96);
+}

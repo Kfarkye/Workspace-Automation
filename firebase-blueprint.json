@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user in the Gemini Workspace Automator.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "email": { "type": "string", "format": "email" },
+        "workspaceAuthorized": { "type": "boolean", "description": "Whether Workspace OAuth is complete" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Workflow": {
+      "title": "Workflow",
+      "description": "Represents an automated workflow execution.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "type": { "type": "string", "enum": ["SUMMARIZE_EMAIL", "EXTRACT_DATA", "GENERATE_REPORT"] },
+        "status": { "type": "string", "enum": ["PENDING", "COMPLETED", "FAILED"] },
+        "inputContext": { "type": "string", "description": "Original input text or context identifier" },
+        "outputResult": { "type": "string", "description": "Resulting summary or link to generated doc" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "completedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "type", "status", "createdAt"]
+    },
+    "Intelligence": {
+      "title": "Intelligence",
+      "description": "Stores extracted and structured data from workspace sources.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "source": { "type": "string", "description": "Source identifier (e.g. email ID)" },
+        "extractedEntities": { "type": "object", "description": "JSON object of extracted data" },
+        "vetted": { "type": "boolean", "description": "Whether the user has verified the data" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "source", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Root user profile"
+    },
+    "/workflows/{workflowId}": {
+      "schema": "Workflow",
+      "description": "Collection of workflow execution logs"
+    },
+    "/intelligence/{dataId}": {
+      "schema": "Intelligence",
+      "description": "Structured data extracted by AI"
+    }
+  }
+}

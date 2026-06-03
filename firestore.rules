@@ -1,0 +1,86 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitives
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    
+    // Bootstrapped Admin
+    function isAdmin() { 
+      return isVerified() && (
+        request.auth.token.email == 'kofi.farkye@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    // Validation Helpers
+    function isValidUser(data) {
+      return data.uid == request.auth.uid 
+        && data.email is string && data.email.size() <= 256
+        && (data.workspaceAuthorized is bool || !data.keys().contains('workspaceAuthorized'));
+    }
+
+    function isValidWorkflow(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == request.auth.uid
+        && data.type in ['SUMMARIZE_EMAIL', 'EXTRACT_DATA', 'GENERATE_REPORT']
+        && data.status in ['PENDING', 'COMPLETED', 'FAILED']
+        && (data.inputContext is string && data.inputContext.size() <= 10000)
+        && (data.outputResult is string && data.outputResult.size() <= 500000 || !data.keys().contains('outputResult'))
+        && data.createdAt is timestamp;
+    }
+
+    function isValidIntelligence(data) {
+      return data.id is string && data.id.size() <= 128
+        && data.userId == request.auth.uid
+        && data.source is string && data.source.size() <= 256
+        && data.extractedEntities is map
+        && data.vetted is bool
+        && data.createdAt is timestamp;
+    }
+
+    // Match blocks
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming())
+        && incoming().uid == existing().uid;
+    }
+
+    match /workflows/{workflowId} {
+      allow list: if isVerified() && resource.data.userId == request.auth.uid;
+      allow get: if isVerified() && (isOwner(existing().userId) || isAdmin());
+      allow create: if isVerified() && isValidWorkflow(incoming()) && incoming().createdAt == request.time;
+      allow update: if isVerified() && isValidWorkflow(incoming())
+        && (
+          // Action: Progress Status
+          (incoming().diff(existing()).affectedKeys().hasOnly(['status', 'outputResult', 'completedAt']) 
+          && existing().status == 'PENDING')
+          || isAdmin()
+        )
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isVerified() && (isOwner(existing().userId) || isAdmin());
+    }
+
+    match /intelligence/{dataId} {
+      allow list: if isVerified() && resource.data.userId == request.auth.uid;
+      allow get: if isVerified() && (isOwner(existing().userId) || isAdmin());
+      allow create: if isVerified() && isValidIntelligence(incoming()) && incoming().createdAt == request.time;
+      allow update: if isVerified() && isValidIntelligence(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['extractedEntities', 'vetted'])
+        && incoming().userId == existing().userId
+        && incoming().createdAt == existing().createdAt;
+      allow delete: if isVerified() && (isOwner(existing().userId) || isAdmin());
+    }
+  }
+}
